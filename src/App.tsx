@@ -1,9 +1,11 @@
 import React from 'react'
 import { KeyboardNav, createKeyboardNavHook } from '../index.ts'
+import './styles.css'
 
 const tabs = new KeyboardNav('horizontal')
-const useObservable = createKeyboardNavHook(tabs)
-const nav = new KeyboardNav()
+const accordion = new KeyboardNav()
+
+const useKeyboardNav = createKeyboardNavHook(tabs)
 
 function Accordion({ children }) {
   return (
@@ -22,15 +24,15 @@ function Panel({ children, title, label, controlledElement }) {
   }
 
   function onKeyDown(event) {
-    nav.update(event, label)
+    accordion.update(event, label)
   }
   React.useEffect(() => {
     if (ref.current) {
-      nav.subscribe(label, ref.current)
+      accordion.subscribe(label, ref.current)
     }
 
     return () => {
-      tabs.unsubscribe(label)
+      accordion.unsubscribe(label)
     }
   }, [])
 
@@ -75,7 +77,8 @@ function Tab({ label, title, setActiveTabs, isSelected = false, index = 0 }) {
   function handleKeyDown(event) {
     tabs.update(event, label)
   }
-  const refs = useObservable(label)
+
+  const refs = useKeyboardNav(label)
 
   return (
     <>
@@ -97,9 +100,9 @@ function Tab({ label, title, setActiveTabs, isSelected = false, index = 0 }) {
 }
 
 function Tabs({ children, defaultValue = '', title }) {
-  let index = 0
-
   const [activeTabs, setActiveTabs] = React.useState(defaultValue)
+
+  let index = 0
   index++
 
   return (
@@ -154,6 +157,7 @@ function Tabs({ children, defaultValue = '', title }) {
 export default function App() {
   return (
     <div id="App" className="App">
+      <h2>Panel</h2>
       <Accordion>
         <Panel title="Title of panel" label="panel1">
           One panel
@@ -168,7 +172,8 @@ export default function App() {
           test
         </Panel>
       </Accordion>
-
+      <hr />
+      <h2>Tabs</h2>
       <Tabs title="Tabs Title" defaultValue="tab1">
         <Tab label="tab1" title="one">
           content 1
@@ -180,39 +185,19 @@ export default function App() {
           content 3
         </Tab>
       </Tabs>
-      <table>
-        <tr>
-          <th>support table</th>
-        </tr>
-        <tr>
-          <td>Arrow up</td>
-        </tr>
-        <tr>
-          <td>Arrow down</td>
-        </tr>
-        <tr>
-          <td>Home</td>
-        </tr>
-        <tr>
-          <td>End</td>
-        </tr>
-        <tr>
-          <td>Tab</td>
-        </tr>
-        <tr>
-          <td>Shift Tab</td>
-        </tr>
-        <tr>
-          <td>Enter / Space</td>
-        </tr>
-        <tr>
-          <td>
-            <a href="https://wai-aria-practices.netlify.app/aria-practices/examples/accordion/accordion.html">
-              Aria compliance
-            </a>
-          </td>
-        </tr>
-      </table>
+      <hr />
+      <ul>
+        <li>
+          <h3>Support for Horizontal & Vertical</h3>
+        </li>
+        <li>Arrow Up</li>
+        <li>Arrow Down</li>
+        <li>Home</li>
+        <li>End</li>
+        <li>Tab</li>
+        <li>Shift Tab</li>
+        <li>Enter / Space</li>
+      </ul>
     </div>
   )
 }
