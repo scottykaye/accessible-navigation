@@ -1,7 +1,9 @@
 :root {
   --text-primary: hsla(360, 100%, 0%, 1);
   --bg-color-primary: hsla(360, 100%, 100%, 1);
+  --bg-color-secondary: 232, 7%, 52%;
   --border-primary: 225, 7%, 20%;
+
   color-scheme: light dark;
   font-family: 'Helvetica', 'Gill Sans', sans-serif;
 }
@@ -10,6 +12,7 @@
   :root {
     --text-primary: hsla(360, 100%, 100%, 1);
     --bg-color-primary: hsla(360, 100%, 0%, 1);
+    --bg-color-secondary: 232, 7%, 32%;
     --border-primary: 225, 7%, 20%;
   }
 }
@@ -17,6 +20,16 @@
 button {
   font-family: inherit;
   cursor: pointer;
+  background-color: hsla(var(--bg-color-secondary), 1);
+  border: 0;
+  appearance: none;
+  padding: 0.5rem;
+}
+button:hover {
+  background-color: hsla(var(--border-primary), 1);
+}
+button:focus {
+  outline-offset: 4px;
 }
 
 body {
@@ -25,23 +38,31 @@ body {
   line-height: 1.5;
   margin: 2rem;
 }
-
-ul {
-  counter-reset: section;
-  list-style: none;
+ul,
+ol {
   margin: 0;
   padding: 0;
 }
 
+ul {
+  list-style: none;
+}
+
+ol {
+  counter-reset: section;
+  list-style: none;
+}
+
 li {
 }
-li:not(:has(> h3)) {
+
+ol li:not(:has(> h3)) {
   counter-increment: decimal;
   counter-increment: section;
   margin-inline-start: 1.2rem;
 }
 
-li:not(:has(> h3))::marker {
+ol li:not(:has(> h3))::marker {
   content: counters(section, '.', decimal) '. ';
 }
 
@@ -59,4 +80,16 @@ hr {
     hsla(var(--border-primary), 0.7)
   );
   margin-block: 2rem;
+}
+
+.tablist {
+  display: flex;
+  gap: 10px;
+}
+.Navlist {
+  display: flex;
+  gap: 10px;
+}
+
+.Submenu {
 }

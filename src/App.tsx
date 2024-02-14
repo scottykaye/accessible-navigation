@@ -154,6 +154,130 @@ function Tabs({ children, defaultValue = '', title }) {
   )
 }
 
+// if there is a listitem we're in a submenu, we'll need a ref
+// up and down open close submenu
+// left and right in submenu navigates between other dropdowns or to the next top level item
+// home end closes submenu navgiates start to end
+// first character navigates through on top menu
+// first character navigates through on dropdowns based on focus
+
+const SUPPORTED_KEYS = {
+  ARROW_UP: 'ArrowUp',
+  ARROW_DOWN: 'ArrowDown',
+  ARROW_LEFT: 'ArrowLeft',
+  ARROW_RIGHT: 'ArrowRight',
+  HOME: 'Home',
+  END: 'End',
+}
+
+class Navigate {
+  readonly orientation?: 'vertical' | 'horizontal'
+  readonly navigation?: false
+  observers: Record<string, HTMLElement>
+
+  constructor(orientation: 'vertical' | 'horizontal' = 'vertical') {
+    this.orientation = orientation
+    this.observers = {}
+  }
+
+  view() {
+    console.log(this.observers)
+  }
+
+  subscribe(label: string, element: HTMLElement): void {
+    this.observers = { ...this.observers, ...{ [label]: element } } as Record<
+      string,
+      HTMLElement
+    >
+    console.log(this.observers)
+    console.log('test', this.observers[label].nextSibling?.textContent)
+  }
+
+  unsubscribe(label: string): void {
+    delete this.observers[label]
+  }
+
+  update(event: KeyboardEvent, current: string): void {
+    const labelList = Object.keys(this.observers)
+    const currentNumber = labelList.findIndex((item) => item === current)
+    const firstItem = 0
+    const lastItem = labelList.length - 1
+    const moveUp = currentNumber > firstItem ? currentNumber - 1 : lastItem
+    const moveDown = currentNumber < lastItem ? currentNumber + 1 : firstItem
+
+    // Expect event.key to be only one of what we support in the list above
+    if (Object.values(SUPPORTED_KEYS).includes(event.key)) {
+      event.preventDefault()
+
+      if (
+        this.orientation === 'horizontal' &&
+        navigation &&
+        this.observers[labelList[currentNumber]].nextSibling &&
+        [SUPPORTED_KEYS.ARROW_UP, SUPPORTED_KEYS.ARROW_DOWN].includes(event.key)
+      ) {
+        const submenu = this.observers?.[labelList[currentNumber]].nextSibling
+        const firstLink = submenu.firstChild.childNodes[0]
+        const lastLink = submenu.lastChild.childNodes[0]
+
+        return event.key === SUPPORTED_KEYS.ARROW_DOWN
+          ? firstLink.focus()
+          : lastLink.focus()
+        // we're in a submenu how do we cycle through the rest?
+      }
+
+      switch (event.key) {
+        case SUPPORTED_KEYS.HOME:
+          this.observers[labelList[firstItem]].focus()
+          break
+        case SUPPORTED_KEYS.END:
+          this.observers[labelList[lastItem]].focus()
+          break
+      }
+      if (this.orientation === 'vertical') {
+        switch (event.key) {
+          case SUPPORTED_KEYS.ARROW_UP:
+            this.observers[labelList[moveUp]].focus()
+            break
+          case SUPPORTED_KEYS.ARROW_DOWN:
+            this.observers[labelList[moveDown]].focus()
+            break
+        }
+      }
+      if (this.orientation === 'horizontal') {
+        switch (event.key) {
+          case SUPPORTED_KEYS.ARROW_LEFT:
+            this.observers[labelList[moveUp]].focus()
+            break
+          case SUPPORTED_KEYS.ARROW_RIGHT:
+            this.observers[labelList[moveDown]].focus()
+            break
+        }
+      }
+    }
+  }
+}
+
+const navigation = new Navigate('horizontal', true)
+
+const useKeyboardNavigation = createKeyboardNavHook(navigation)
+
+function ListItem({ label, children, href = '#', submenu }) {
+  function handleKeyDown(event) {
+    navigation.update(event, label)
+  }
+
+  const refs = useKeyboardNavigation(label)
+
+  return (
+    <li className="Nav-item">
+      <a href={href} ref={refs} onKeyDown={handleKeyDown}>
+        {children}
+      </a>
+      {submenu}
+    </li>
+  )
+}
+
 export default function App() {
   return (
     <div id="App" className="App">
@@ -186,7 +310,7 @@ export default function App() {
         </Tab>
       </Tabs>
       <hr />
-      <ul>
+      <ol>
         <li>
           <h3>Support for Horizontal & Vertical</h3>
         </li>
@@ -197,7 +321,32 @@ export default function App() {
         <li>Tab</li>
         <li>Shift Tab</li>
         <li>Enter / Space</li>
-      </ul>
+      </ol>
+      <hr />
+      <h2>Keyboard Nav</h2>
+      <nav className="Nav">
+        <ul className="Navlist">
+          <ListItem
+            label="nav1"
+            submenu={
+              <ul className="Submenu">
+                <li>
+                  <a href="">sub</a>
+                </li>
+                <li>
+                  <a href="">second</a>
+                </li>
+                <li>
+                  <a href="">last</a>
+                </li>
+              </ul>
+            }
+          >
+            test
+          </ListItem>
+          <ListItem label="nav2">test</ListItem>
+        </ul>
+      </nav>
     </div>
   )
 }
