@@ -26,6 +26,7 @@ function Panel({ children, title, label, controlledElement }) {
   function onKeyDown(event) {
     accordion.update(event, label)
   }
+
   React.useEffect(() => {
     if (ref.current) {
       accordion.subscribe(label, ref.current)
@@ -160,6 +161,13 @@ function Tabs({ children, defaultValue = '', title }) {
 // home end closes submenu navgiates start to end
 // first character navigates through on top menu
 // first character navigates through on dropdowns based on focus
+// navigates through on dropdowns based on focus
+
+// we don't want to remove enter and space functionality unless we know theres a submenu
+const SMALL_SUPPORT = {
+  ENTER: 'Enter',
+  SPACE: ' ',
+}
 
 const SUPPORTED_KEYS = {
   ARROW_UP: 'ArrowUp',
@@ -169,6 +177,12 @@ const SUPPORTED_KEYS = {
   HOME: 'Home',
   END: 'End',
   ESCAPE: 'Escape',
+}
+
+const LETTERS = {}
+for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
+  const letter = String.fromCharCode(i)
+  LETTERS[letter.toUpperCase()] = letter.toLowerCase()
 }
 
 class Navigate {
@@ -203,45 +217,79 @@ class Navigate {
     const currentNumber = labelList.findIndex((item) => item === current)
     const firstItem = 0
     const lastItem = labelList.length - 1
+    const currentItem = this.observers[labelList[currentNumber]]
     const moveUp = currentNumber > firstItem ? currentNumber - 1 : lastItem
     const moveDown = currentNumber < lastItem ? currentNumber + 1 : firstItem
 
-    // Expect event.key to be only one of what we support in the list above
-    if (Object.values(SUPPORTED_KEYS).includes(event.key)) {
-      event.preventDefault()
-
-      if (event.key === SUPPORTED_KEYS.ESCAPE) {
-        // hasChildNodes hasParentNodes
-        const submenu =
-          this?.observers?.[labelList?.[currentNumber]]?.parentNode?.parentNode
-
-        if (submenu.style.visibility === 'visible') {
-          submenu.style = 'visibility: hidden'
-        }
-
-        this?.observers?.[
-          labelList?.[currentNumber]
-        ]?.parentNode?.parentNode?.parentNode?.childNodes[0]?.focus()
+    if (navigation) {
+      const sibling = currentItem.nextSibling
+      if (Object.values(LETTERS).includes(event.key.toLowerCase())) {
+        const options = Object.values(this.observers).map((item) =>
+          item.textContent.slice(0, 1),
+        )
+        // starting from the current number index, find the first match
+        const item = options.findIndex((letter, index) => {
+          console.log(index)
+          if (index > currentNumber) {
+            return letter === event.key
+          }
+        })
+        console.log(currentNumber, item)
+        return this.observers?.[labelList[item]]?.focus()
+        //
       }
 
-      if (
-        this.orientation === 'horizontal' &&
-        navigation &&
-        this.observers[labelList[currentNumber]]?.nextSibling &&
-        [SUPPORTED_KEYS.ARROW_UP, SUPPORTED_KEYS.ARROW_DOWN].includes(event.key)
-      ) {
-        const submenu = this.observers?.[labelList[currentNumber]].nextSibling
-        const firstLink = submenu.firstChild.childNodes[0]
-        const lastLink = submenu.lastChild.childNodes[0]
-        submenu.style = 'visibility: visible'
+      if (event.key === SMALL_SUPPORT.SPACE && !sibling) {
+        // support space bar click single item
+        return currentItem.click()
+      }
 
-        if (event.key === 'Escape') {
-          submenu.style = 'visibility: hidden'
+      // support submenu dropdowns with space and enter
+      if (Object.values(SMALL_SUPPORT).includes(event.key) && sibling) {
+        event.preventDefault()
+        const firstLink = sibling.firstChild.childNodes[0]
+        sibling.style = 'visibility: visible'
+
+        return firstLink.focus()
+      }
+
+      // Expect event.key to be only one of what we support in the list above
+      if (Object.values(SUPPORTED_KEYS).includes(event.key)) {
+        event.preventDefault()
+        if (event.key === SUPPORTED_KEYS.ESCAPE) {
+          // hasChildNodes hasParentNodes
+          const submenu = currentItem?.parentNode?.parentNode
+          if (submenu.style.visibility === 'visible') {
+            submenu.style.visibility = ''
+          }
+
+          currentItem.parentNode?.parentNode?.parentNode?.childNodes[0]?.focus()
         }
-        return event.key === SUPPORTED_KEYS.ARROW_DOWN
-          ? firstLink.focus()
-          : lastLink.focus()
-        // we're in a submenu how do we cycle through the rest?
+
+        if (
+          // props
+          this.orientation === 'horizontal' &&
+          // has sibling
+          currentItem.nextSibling &&
+          // arrow support for props
+          [SUPPORTED_KEYS.ARROW_UP, SUPPORTED_KEYS.ARROW_DOWN].includes(
+            event.key,
+          )
+        ) {
+          const submenu = currentItem.nextSibling
+          const firstLink = submenu.firstChild.childNodes[0]
+          const lastLink = submenu.lastChild.childNodes[0]
+
+          submenu.style = 'visibility: visible'
+
+          if (event.key === 'Escape') {
+            submenu.style = 'visibility: hidden'
+          }
+
+          return event.key === SUPPORTED_KEYS.ARROW_DOWN
+            ? firstLink.focus()
+            : lastLink.focus()
+        }
       }
 
       switch (event.key) {
@@ -274,6 +322,21 @@ class Navigate {
       }
     }
   }
+
+  updateBlur(current: string): void {
+    const labelList = Object.keys(this.observers)
+    const currentNumber = labelList.findIndex((item) => item === current)
+    const currentItem = this.observers[labelList[currentNumber]]
+    const parent = currentItem?.parentNode?.parentNode
+
+    document.addEventListener('click', (event) => {
+      if (!parent.contains(event.target)) {
+        if (parent.style.visibility === 'visible') {
+          parent.style.visibility = ''
+        }
+      }
+    })
+  }
 }
 
 const navigation = new Navigate('horizontal', true)
@@ -298,16 +361,27 @@ function ListItem({ label, children, href = '#', submenu }) {
 
 const subnav = new Navigate('vertical', true)
 const useKeyboardSubNavigation = createKeyboardNavHook(subnav)
+
 function SubListItem({ label, children, href = '#', submenu }) {
   function handleKeyDown(event) {
     subnav.update(event, label)
+  }
+
+  function handleBlur() {
+    subnav.updateBlur(label)
   }
 
   const refs = useKeyboardSubNavigation(label)
 
   return (
     <li className="Nav-item" role="none">
-      <a href={href} role="menu-item" ref={refs} onKeyDown={handleKeyDown}>
+      <a
+        href={href}
+        role="menu-item"
+        ref={refs}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+      >
         {children}
       </a>
       {submenu}
@@ -377,6 +451,7 @@ export default function App() {
           </ListItem>
           <ListItem label="nav2">test</ListItem>
           <ListItem label="nav3">test</ListItem>
+          <ListItem label="nav4">test</ListItem>
         </ul>
       </nav>
     </div>
