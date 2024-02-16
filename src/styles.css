@@ -53,7 +53,37 @@ ol {
   list-style: none;
 }
 
-li {
+[role='menuitem'] {
+  display: block;
+  padding: 0.5rem;
+}
+.Nav-item {
+  position: relative;
+  display: block;
+}
+.Nav-item ul {
+  visibility: hidden;
+
+  width: 10rem;
+  border: 1px solid red;
+}
+
+.Nav-item:focus,
+.Nav-item:hover {
+  ul {
+    visibility: visible;
+  }
+}
+.Nav-item ul:has(:focus) {
+  visibility: visible;
+  background: red;
+}
+
+.Submenu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 1;
 }
 
 ol li:not(:has(> h3)) {

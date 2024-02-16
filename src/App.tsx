@@ -168,6 +168,7 @@ const SUPPORTED_KEYS = {
   ARROW_RIGHT: 'ArrowRight',
   HOME: 'Home',
   END: 'End',
+  ESCAPE: 'Escape',
 }
 
 class Navigate {
@@ -189,8 +190,8 @@ class Navigate {
       string,
       HTMLElement
     >
-    console.log(this.observers)
-    console.log('test', this.observers[label].nextSibling?.textContent)
+    // console.log(this.observers)
+    // console.log('test', this.observers[label]?.nextSibling?.textContent)
   }
 
   unsubscribe(label: string): void {
@@ -209,16 +210,34 @@ class Navigate {
     if (Object.values(SUPPORTED_KEYS).includes(event.key)) {
       event.preventDefault()
 
+      if (event.key === SUPPORTED_KEYS.ESCAPE) {
+        // hasChildNodes hasParentNodes
+        const submenu =
+          this?.observers?.[labelList?.[currentNumber]]?.parentNode?.parentNode
+
+        if (submenu.style.visibility === 'visible') {
+          submenu.style = 'visibility: hidden'
+        }
+
+        this?.observers?.[
+          labelList?.[currentNumber]
+        ]?.parentNode?.parentNode?.parentNode?.childNodes[0]?.focus()
+      }
+
       if (
         this.orientation === 'horizontal' &&
         navigation &&
-        this.observers[labelList[currentNumber]].nextSibling &&
+        this.observers[labelList[currentNumber]]?.nextSibling &&
         [SUPPORTED_KEYS.ARROW_UP, SUPPORTED_KEYS.ARROW_DOWN].includes(event.key)
       ) {
         const submenu = this.observers?.[labelList[currentNumber]].nextSibling
         const firstLink = submenu.firstChild.childNodes[0]
         const lastLink = submenu.lastChild.childNodes[0]
+        submenu.style = 'visibility: visible'
 
+        if (event.key === 'Escape') {
+          submenu.style = 'visibility: hidden'
+        }
         return event.key === SUPPORTED_KEYS.ARROW_DOWN
           ? firstLink.focus()
           : lastLink.focus()
@@ -258,7 +277,6 @@ class Navigate {
 }
 
 const navigation = new Navigate('horizontal', true)
-
 const useKeyboardNavigation = createKeyboardNavHook(navigation)
 
 function ListItem({ label, children, href = '#', submenu }) {
@@ -269,8 +287,27 @@ function ListItem({ label, children, href = '#', submenu }) {
   const refs = useKeyboardNavigation(label)
 
   return (
-    <li className="Nav-item">
-      <a href={href} ref={refs} onKeyDown={handleKeyDown}>
+    <li className="Nav-item" role="none">
+      <a role="menuitem" href={href} ref={refs} onKeyDown={handleKeyDown}>
+        {children}
+      </a>
+      {submenu}
+    </li>
+  )
+}
+
+const subnav = new Navigate('vertical', true)
+const useKeyboardSubNavigation = createKeyboardNavHook(subnav)
+function SubListItem({ label, children, href = '#', submenu }) {
+  function handleKeyDown(event) {
+    subnav.update(event, label)
+  }
+
+  const refs = useKeyboardSubNavigation(label)
+
+  return (
+    <li className="Nav-item" role="none">
+      <a href={href} role="menu-item" ref={refs} onKeyDown={handleKeyDown}>
         {children}
       </a>
       {submenu}
@@ -330,21 +367,16 @@ export default function App() {
             label="nav1"
             submenu={
               <ul className="Submenu">
-                <li>
-                  <a href="">sub</a>
-                </li>
-                <li>
-                  <a href="">second</a>
-                </li>
-                <li>
-                  <a href="">last</a>
-                </li>
+                <SubListItem label="sub1">first</SubListItem>
+                <SubListItem label="sub2">second</SubListItem>
+                <SubListItem label="sub3">third</SubListItem>
               </ul>
             }
           >
             test
           </ListItem>
           <ListItem label="nav2">test</ListItem>
+          <ListItem label="nav3">test</ListItem>
         </ul>
       </nav>
     </div>
