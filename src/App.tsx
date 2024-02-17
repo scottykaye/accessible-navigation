@@ -223,20 +223,25 @@ class Navigate {
 
     if (navigation) {
       const sibling = currentItem.nextSibling
-      if (Object.values(LETTERS).includes(event.key.toLowerCase())) {
+      // if (Object.values(LETTERS).includes(event.key.toLowerCase())) {
+      if (/^[a-z0-9]$/i.test(event.key.toLowerCase())) {
         const options = Object.values(this.observers).map((item) =>
-          item.textContent.slice(0, 1),
+          item.textContent.toLowerCase().slice(0, 1),
         )
-        // starting from the current number index, find the first match
-        const item = options.findIndex((letter, index) => {
-          console.log(index)
+
+        let item = options.findIndex((letter, index) => {
           if (index > currentNumber) {
-            return letter === event.key
+            return letter === event.key.toLowerCase()
           }
         })
-        console.log(currentNumber, item)
+
+        if (item === -1) {
+          item = options.findIndex(
+            (letter) => letter === event.key.toLowerCase(),
+          )
+        }
+
         return this.observers?.[labelList[item]]?.focus()
-        //
       }
 
       if (event.key === SMALL_SUPPORT.SPACE && !sibling) {
@@ -449,9 +454,9 @@ export default function App() {
           >
             test
           </ListItem>
-          <ListItem label="nav2">test</ListItem>
+          <ListItem label="nav2">Scott</ListItem>
           <ListItem label="nav3">test</ListItem>
-          <ListItem label="nav4">test</ListItem>
+          <ListItem label="nav4">Matt</ListItem>
         </ul>
       </nav>
     </div>
