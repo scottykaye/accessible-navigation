@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
 
 const SUPPORTED_KEYS = {
   ARROW_UP: 'ArrowUp',
@@ -78,12 +78,7 @@ export class KeyboardNav {
   }
 }
 
-interface RefObject<T> {
-  // Not readonly because we manipulate it with mergeRefs
-  current: T | null
-}
-
-const mergeRefs = (...refs: Array<RefObject<HTMLElement>>) => {
+const mergeRefs = (...refs: Array<React.MutableRefObject<HTMLElement>>) => {
   return (node: HTMLElement) => {
     for (const ref of refs) {
       ref.current = node
@@ -94,7 +89,7 @@ const mergeRefs = (...refs: Array<RefObject<HTMLElement>>) => {
 export function createKeyboardNavHook(instance: KeyboardNav) {
   return function useKeyboardNav(
     label: string,
-    parentRef?: RefObject<HTMLElement>,
+    parentRef?: React.MutableRefObject<HTMLElement>,
   ) {
     const refs = useCallback(
       (node: HTMLElement) => {

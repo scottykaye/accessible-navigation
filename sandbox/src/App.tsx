@@ -33,7 +33,7 @@ function Panel({
     setIsOpen((isOpen) => !isOpen)
   }
 
-  function onKeyDown(event: React.KeyboardEvent) {
+  function onKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
     accordion.update(event, label)
   }
 
@@ -211,7 +211,7 @@ const SUPPORTED_KEYS = {
   ESCAPE: 'Escape',
 }
 
-const LETTERS = {}
+const LETTERS: Record<string, string> = {}
 for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
   const letter = String.fromCharCode(i)
   LETTERS[letter.toUpperCase()] = letter.toLowerCase()
@@ -219,12 +219,16 @@ for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
 
 class Navigate {
   readonly orientation?: 'vertical' | 'horizontal'
-  readonly navigation?: false
+  readonly navigation?: boolean
   observers: Record<string, HTMLElement>
 
-  constructor(orientation: 'vertical' | 'horizontal' = 'vertical') {
+  constructor(
+    orientation: 'vertical' | 'horizontal' = 'vertical',
+    navigation: boolean = false,
+  ) {
     this.orientation = orientation
     this.observers = {}
+    this.navigation = navigation
   }
 
   view() {
@@ -254,11 +258,11 @@ class Navigate {
     const moveDown = currentNumber < lastItem ? currentNumber + 1 : firstItem
 
     if (navigation) {
-      const sibling = currentItem.nextSibling
+      const sibling = currentItem.nextSibling as HTMLElement
       // if (Object.values(LETTERS).includes(event.key.toLowerCase())) {
       if (/^[a-z0-9]$/i.test(event.key.toLowerCase())) {
         const options = Object.values(this.observers).map((item) =>
-          item.textContent.toLowerCase().slice(0, 1),
+          item?.textContent?.toLowerCase().slice(0, 1),
         )
 
         let item = options.findIndex((letter, index) => {
@@ -284,8 +288,8 @@ class Navigate {
       // support submenu dropdowns with space and enter
       if (Object.values(SMALL_SUPPORT).includes(event.key) && sibling) {
         event.preventDefault()
-        const firstLink = sibling.firstChild.childNodes[0]
-        sibling.style = 'visibility: visible'
+        const firstLink = sibling?.firstChild?.childNodes[0] as HTMLElement
+        sibling.setAttribute('style', 'visibility: visible')
 
         return firstLink.focus()
       }
@@ -295,12 +299,14 @@ class Navigate {
         event.preventDefault()
         if (event.key === SUPPORTED_KEYS.ESCAPE) {
           // hasChildNodes hasParentNodes
-          const submenu = currentItem?.parentNode?.parentNode
-          if (submenu.style.visibility === 'visible') {
+          const submenu = currentItem?.parentNode?.parentNode as HTMLElement
+          if (submenu?.style?.visibility === 'visible') {
             submenu.style.visibility = ''
           }
 
-          currentItem.parentNode?.parentNode?.parentNode?.childNodes[0]?.focus()
+          const prevMenu = submenu?.parentNode?.childNodes[0] as HTMLElement
+
+          prevMenu?.focus()
         }
 
         if (
@@ -313,14 +319,14 @@ class Navigate {
             event.key,
           )
         ) {
-          const submenu = currentItem.nextSibling
-          const firstLink = submenu.firstChild.childNodes[0]
-          const lastLink = submenu.lastChild.childNodes[0]
+          const submenu = currentItem.nextSibling as HTMLElement
+          const firstLink = submenu?.firstChild?.childNodes[0] as HTMLElement
+          const lastLink = submenu?.lastChild?.childNodes[0] as HTMLElement
 
-          submenu.style = 'visibility: visible'
+          submenu.setAttribute('style', 'visibility: visible')
 
           if (event.key === 'Escape') {
-            submenu.style = 'visibility: hidden'
+            submenu.setAttribute('style', 'visibility: hidden')
           }
 
           return event.key === SUPPORTED_KEYS.ARROW_DOWN
@@ -364,10 +370,10 @@ class Navigate {
     const labelList = Object.keys(this.observers)
     const currentNumber = labelList.findIndex((item) => item === current)
     const currentItem = this.observers[labelList[currentNumber]]
-    const parent = currentItem?.parentNode?.parentNode
+    const parent = currentItem?.parentNode?.parentNode as HTMLElement
 
     document.addEventListener('click', (event) => {
-      if (!parent.contains(event.target)) {
+      if (!parent.contains(event.target as Node)) {
         if (parent.style.visibility === 'visible') {
           parent.style.visibility = ''
         }
@@ -378,9 +384,15 @@ class Navigate {
 
 const navigation = new Navigate('horizontal', true)
 const useKeyboardNavigation = createKeyboardNavHook(navigation)
+interface ListItemOptions {
+  label: string
+  children: React.ReactNode
+  href?: string
+  submenu?: React.ReactNode
+}
 
-function ListItem({ label, children, href = '#', submenu }) {
-  function handleKeyDown(event) {
+function ListItem({ label, children, href = '#', submenu }: ListItemOptions) {
+  function handleKeyDown(event: any) {
     navigation.update(event, label)
   }
 
@@ -399,8 +411,13 @@ function ListItem({ label, children, href = '#', submenu }) {
 const subnav = new Navigate('vertical', true)
 const useKeyboardSubNavigation = createKeyboardNavHook(subnav)
 
-function SubListItem({ label, children, href = '#', submenu }) {
-  function handleKeyDown(event) {
+function SubListItem({
+  label,
+  children,
+  href = '#',
+  submenu,
+}: ListItemOptions) {
+  function handleKeyDown(event: any) {
     subnav.update(event, label)
   }
 
