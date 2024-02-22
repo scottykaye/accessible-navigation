@@ -187,6 +187,245 @@ function Tabs({
   )
 }
 
+// if there is a listitem we're in a submenu, we'll need a ref
+// up and down open close submenu
+// left and right in submenu navigates between other dropdowns or to the next top level item
+// home end closes submenu navgiates start to end
+// first character navigates through on top menu
+// first character navigates through on dropdowns based on focus
+// navigates through on dropdowns based on focus
+
+// we don't want to remove enter and space functionality unless we know theres a submenu
+const SMALL_SUPPORT = {
+  ENTER: 'Enter',
+  SPACE: ' ',
+}
+
+const SUPPORTED_KEYS = {
+  ARROW_UP: 'ArrowUp',
+  ARROW_DOWN: 'ArrowDown',
+  ARROW_LEFT: 'ArrowLeft',
+  ARROW_RIGHT: 'ArrowRight',
+  HOME: 'Home',
+  END: 'End',
+  ESCAPE: 'Escape',
+}
+
+const LETTERS = {}
+for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
+  const letter = String.fromCharCode(i)
+  LETTERS[letter.toUpperCase()] = letter.toLowerCase()
+}
+
+class Navigate {
+  readonly orientation?: 'vertical' | 'horizontal'
+  readonly navigation?: false
+  observers: Record<string, HTMLElement>
+
+  constructor(orientation: 'vertical' | 'horizontal' = 'vertical') {
+    this.orientation = orientation
+    this.observers = {}
+  }
+
+  view() {
+    console.log(this.observers)
+  }
+
+  subscribe(label: string, element: HTMLElement): void {
+    this.observers = { ...this.observers, ...{ [label]: element } } as Record<
+      string,
+      HTMLElement
+    >
+    // console.log(this.observers)
+    // console.log('test', this.observers[label]?.nextSibling?.textContent)
+  }
+
+  unsubscribe(label: string): void {
+    delete this.observers[label]
+  }
+
+  update(event: KeyboardEvent, current: string): void {
+    const labelList = Object.keys(this.observers)
+    const currentNumber = labelList.findIndex((item) => item === current)
+    const firstItem = 0
+    const lastItem = labelList.length - 1
+    const currentItem = this.observers[labelList[currentNumber]]
+    const moveUp = currentNumber > firstItem ? currentNumber - 1 : lastItem
+    const moveDown = currentNumber < lastItem ? currentNumber + 1 : firstItem
+
+    if (navigation) {
+      const sibling = currentItem.nextSibling
+      // if (Object.values(LETTERS).includes(event.key.toLowerCase())) {
+      if (/^[a-z0-9]$/i.test(event.key.toLowerCase())) {
+        const options = Object.values(this.observers).map((item) =>
+          item.textContent.toLowerCase().slice(0, 1),
+        )
+
+        let item = options.findIndex((letter, index) => {
+          if (index > currentNumber) {
+            return letter === event.key.toLowerCase()
+          }
+        })
+
+        if (item === -1) {
+          item = options.findIndex(
+            (letter) => letter === event.key.toLowerCase(),
+          )
+        }
+
+        return this.observers?.[labelList[item]]?.focus()
+      }
+
+      if (event.key === SMALL_SUPPORT.SPACE && !sibling) {
+        // support space bar click single item
+        return currentItem.click()
+      }
+
+      // support submenu dropdowns with space and enter
+      if (Object.values(SMALL_SUPPORT).includes(event.key) && sibling) {
+        event.preventDefault()
+        const firstLink = sibling.firstChild.childNodes[0]
+        sibling.style = 'visibility: visible'
+
+        return firstLink.focus()
+      }
+
+      // Expect event.key to be only one of what we support in the list above
+      if (Object.values(SUPPORTED_KEYS).includes(event.key)) {
+        event.preventDefault()
+        if (event.key === SUPPORTED_KEYS.ESCAPE) {
+          // hasChildNodes hasParentNodes
+          const submenu = currentItem?.parentNode?.parentNode
+          if (submenu.style.visibility === 'visible') {
+            submenu.style.visibility = ''
+          }
+
+          currentItem.parentNode?.parentNode?.parentNode?.childNodes[0]?.focus()
+        }
+
+        if (
+          // props
+          this.orientation === 'horizontal' &&
+          // has sibling
+          currentItem.nextSibling &&
+          // arrow support for props
+          [SUPPORTED_KEYS.ARROW_UP, SUPPORTED_KEYS.ARROW_DOWN].includes(
+            event.key,
+          )
+        ) {
+          const submenu = currentItem.nextSibling
+          const firstLink = submenu.firstChild.childNodes[0]
+          const lastLink = submenu.lastChild.childNodes[0]
+
+          submenu.style = 'visibility: visible'
+
+          if (event.key === 'Escape') {
+            submenu.style = 'visibility: hidden'
+          }
+
+          return event.key === SUPPORTED_KEYS.ARROW_DOWN
+            ? firstLink.focus()
+            : lastLink.focus()
+        }
+      }
+
+      switch (event.key) {
+        case SUPPORTED_KEYS.HOME:
+          this.observers[labelList[firstItem]].focus()
+          break
+        case SUPPORTED_KEYS.END:
+          this.observers[labelList[lastItem]].focus()
+          break
+      }
+      if (this.orientation === 'vertical') {
+        switch (event.key) {
+          case SUPPORTED_KEYS.ARROW_UP:
+            this.observers[labelList[moveUp]].focus()
+            break
+          case SUPPORTED_KEYS.ARROW_DOWN:
+            this.observers[labelList[moveDown]].focus()
+            break
+        }
+      }
+      if (this.orientation === 'horizontal') {
+        switch (event.key) {
+          case SUPPORTED_KEYS.ARROW_LEFT:
+            this.observers[labelList[moveUp]].focus()
+            break
+          case SUPPORTED_KEYS.ARROW_RIGHT:
+            this.observers[labelList[moveDown]].focus()
+            break
+        }
+      }
+    }
+  }
+
+  updateBlur(current: string): void {
+    const labelList = Object.keys(this.observers)
+    const currentNumber = labelList.findIndex((item) => item === current)
+    const currentItem = this.observers[labelList[currentNumber]]
+    const parent = currentItem?.parentNode?.parentNode
+
+    document.addEventListener('click', (event) => {
+      if (!parent.contains(event.target)) {
+        if (parent.style.visibility === 'visible') {
+          parent.style.visibility = ''
+        }
+      }
+    })
+  }
+}
+
+const navigation = new Navigate('horizontal', true)
+const useKeyboardNavigation = createKeyboardNavHook(navigation)
+
+function ListItem({ label, children, href = '#', submenu }) {
+  function handleKeyDown(event) {
+    navigation.update(event, label)
+  }
+
+  const refs = useKeyboardNavigation(label)
+
+  return (
+    <li className="Nav-item" role="none">
+      <a role="menuitem" href={href} ref={refs} onKeyDown={handleKeyDown}>
+        {children}
+      </a>
+      {submenu}
+    </li>
+  )
+}
+
+const subnav = new Navigate('vertical', true)
+const useKeyboardSubNavigation = createKeyboardNavHook(subnav)
+
+function SubListItem({ label, children, href = '#', submenu }) {
+  function handleKeyDown(event) {
+    subnav.update(event, label)
+  }
+
+  function handleBlur() {
+    subnav.updateBlur(label)
+  }
+
+  const refs = useKeyboardSubNavigation(label)
+
+  return (
+    <li className="Nav-item" role="none">
+      <a
+        href={href}
+        role="menu-item"
+        ref={refs}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+      >
+        {children}
+      </a>
+      {submenu}
+    </li>
+  )
+}
+
 export default function App() {
   return (
     <div id="App" className="App">
@@ -219,7 +458,7 @@ export default function App() {
         </Tab>
       </Tabs>
       <hr />
-      <ul>
+      <ol>
         <li>
           <h3>Support for Horizontal & Vertical</h3>
         </li>
@@ -230,7 +469,28 @@ export default function App() {
         <li>Tab</li>
         <li>Shift Tab</li>
         <li>Enter / Space</li>
-      </ul>
+      </ol>
+      <hr />
+      <h2>Keyboard Nav</h2>
+      <nav className="Nav">
+        <ul className="Navlist">
+          <ListItem
+            label="nav1"
+            submenu={
+              <ul className="Submenu">
+                <SubListItem label="sub1">first</SubListItem>
+                <SubListItem label="sub2">second</SubListItem>
+                <SubListItem label="sub3">third</SubListItem>
+              </ul>
+            }
+          >
+            test
+          </ListItem>
+          <ListItem label="nav2">Scott</ListItem>
+          <ListItem label="nav3">test</ListItem>
+          <ListItem label="nav4">Matt</ListItem>
+        </ul>
+      </nav>
     </div>
   )
 }
