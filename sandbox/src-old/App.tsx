@@ -1,5 +1,8 @@
 import React from 'react'
-import { KeyboardNav, createKeyboardNavHook } from '../index.ts'
+import {
+  KeyboardNav,
+  createKeyboardNavHook,
+} from '../../packages/keyboard-navigation/dist'
 import './styles.css'
 
 const tabs = new KeyboardNav('horizontal')

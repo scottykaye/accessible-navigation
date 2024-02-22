@@ -94,7 +94,7 @@ const mergeRefs = (...refs: Array<RefObject<HTMLElement>>) => {
 export function createKeyboardNavHook(instance: KeyboardNav) {
   return function useKeyboardNav(
     label: string,
-    parentRef: RefObject<HTMLElement>,
+    parentRef?: RefObject<HTMLElement>,
   ) {
     const refs = useCallback(
       (node: HTMLElement) => {
