@@ -1,13 +1,13 @@
-import React from 'react'
-import { KeyboardNav, createKeyboardNavHook } from '../index.ts'
-import './styles.css'
+import React, { ReactNode } from 'react'
+import { KeyboardNav, createKeyboardNavHook } from 'keyboard-navigation'
+import './index.css'
 
 const tabs = new KeyboardNav('horizontal')
 const accordion = new KeyboardNav()
 
 const useKeyboardNav = createKeyboardNavHook(tabs)
 
-function Accordion({ children }) {
+function Accordion({ children }: { children: ReactNode }) {
   return (
     <div id="accordionGroup" className="accordion">
       {children}
@@ -15,7 +15,17 @@ function Accordion({ children }) {
   )
 }
 
-function Panel({ children, title, label, controlledElement }) {
+function Panel({
+  children,
+  title,
+  label,
+  controlledElement,
+}: {
+  children: ReactNode
+  title: ReactNode
+  label: string
+  controlledElement?: string
+}) {
   const [isOpen, setIsOpen] = React.useState(false)
   const ref = React.useRef()
 
@@ -23,9 +33,10 @@ function Panel({ children, title, label, controlledElement }) {
     setIsOpen((isOpen) => !isOpen)
   }
 
-  function onKeyDown(event) {
+  function onKeyDown(event: React.KeyboardEvent) {
     accordion.update(event, label)
   }
+
   React.useEffect(() => {
     if (ref.current) {
       accordion.subscribe(label, ref.current)
@@ -48,7 +59,7 @@ function Panel({ children, title, label, controlledElement }) {
           id={label}
           onClick={handleToggle}
           className={`accordion-button ${isOpen ? 'isSelected' : ''}`}
-          ref={ref}
+          ref={ref as any}
           onKeyDown={onKeyDown}
         >
           {title}
@@ -69,12 +80,25 @@ function Panel({ children, title, label, controlledElement }) {
   )
 }
 
-function Tab({ label, title, setActiveTabs, isSelected = false, index = 0 }) {
+function Tab({
+  label,
+  title,
+  setActiveTabs = () => {},
+  isSelected = false,
+  index = 0,
+}: {
+  label: string
+  title: ReactNode
+  setActiveTabs?: (label: string) => void
+  isSelected?: boolean
+  index?: number
+  children?: React.ReactNode
+}) {
   function handleClick() {
     setActiveTabs(label)
   }
 
-  function handleKeyDown(event) {
+  function handleKeyDown(event: React.KeyboardEvent) {
     tabs.update(event, label)
   }
 
@@ -99,7 +123,16 @@ function Tab({ label, title, setActiveTabs, isSelected = false, index = 0 }) {
   )
 }
 
-function Tabs({ children, defaultValue = '', title }) {
+function Tabs({
+  children,
+  defaultValue = '',
+  title,
+}: {
+  // Because we do this the way we do mapping through the childs grandchildren to get the tabs api we want,  we have to expect a JSX element because it cannot be a string or some of the other options ReactNode gives us like false, undefined, null
+  children: JSX.Element | Array<JSX.Element>
+  defaultValue?: string
+  title?: ReactNode
+}) {
   const [activeTabs, setActiveTabs] = React.useState(defaultValue)
 
   let index = 0
@@ -135,8 +168,8 @@ function Tabs({ children, defaultValue = '', title }) {
         })}
       </div>
       {React.Children.map(children, (child) => {
-        const childProps = { ...child.props }
-        const { label } = child.props
+        const childProps = { ...child?.props }
+        const { label } = child?.props
 
         return (
           activeTabs === label && (
