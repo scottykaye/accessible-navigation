@@ -40,3 +40,84 @@
 .read-the-docs {
   color: #888;
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ol {
+  counter-reset: section;
+  list-style: none;
+}
+
+[role='menuitem'] {
+  display: block;
+  padding: 0.5rem;
+}
+.Nav-item {
+  position: relative;
+  display: block;
+}
+.Nav-item ul {
+  visibility: hidden;
+  width: 10rem;
+  border: 1px solid rgba(0, 0, 0.8);
+}
+
+.Nav-item:focus,
+.Nav-item:hover {
+  > ul {
+    visibility: visible;
+  }
+}
+.Nav-item ul:has(:focus) {
+  visibility: visible;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.Submenu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 1;
+  .Submenu {
+    inset-block-start: 0;
+    inset-inline-start: 100%;
+  }
+}
+
+ol li:not(:has(> h3)) {
+  counter-increment: decimal;
+  counter-increment: section;
+  margin-inline-start: 1.2rem;
+}
+
+ol li:not(:has(> h3))::marker {
+  content: counters(section, '.', decimal) '. ';
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  /* box-shadow: 0 0 0 1px var(--border-primary);*/
+  background-image: linear-gradient(
+    to right,
+    hsla(var(--border-primary), 0.7),
+    hsla(var(--border-primary), 1),
+    hsla(var(--border-primary), 0.7)
+  );
+  margin-block: 2rem;
+}
+
+.tablist {
+  display: flex;
+  gap: 10px;
+}
+.Navlist {
+  display: flex;
+  gap: 10px;
+}
+
+.Submenu {
+}

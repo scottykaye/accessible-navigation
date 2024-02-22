@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import { KeyboardNav, createKeyboardNavHook } from 'keyboard-navigation'
 import './index.css'
+import './App.css'
 
 const tabs = new KeyboardNav('horizontal')
 const accordion = new KeyboardNav()
@@ -298,7 +299,7 @@ class Navigate {
       if (Object.values(SUPPORTED_KEYS).includes(event.key)) {
         event.preventDefault()
         if (event.key === SUPPORTED_KEYS.ESCAPE) {
-          // hasChildNodes hasParentNodes
+          // hasChildNodes hasParentNodes do we need to check with these
           const submenu = currentItem?.parentNode?.parentNode as HTMLElement
           if (submenu?.style?.visibility === 'visible') {
             submenu.style.visibility = ''
@@ -328,12 +329,40 @@ class Navigate {
           if (event.key === 'Escape') {
             submenu.setAttribute('style', 'visibility: hidden')
           }
-
           return event.key === SUPPORTED_KEYS.ARROW_DOWN
             ? firstLink.focus()
             : lastLink.focus()
         }
       }
+
+      // if it has a left and right sub menu
+      // a check will be needed here
+      // LEFT brings you back to the last level
+      // or right if theres no drop down!
+      if (
+        // props
+        this.orientation === 'vertical' &&
+        // has sibling
+        currentItem.nextSibling &&
+        // arrow support for props
+        [SUPPORTED_KEYS.ARROW_RIGHT].includes(event.key)
+      ) {
+        const submenu = currentItem.nextSibling as HTMLElement
+
+        const firstLink = submenu?.firstChild?.childNodes[0] as HTMLElement
+
+        submenu.setAttribute('style', 'visibility: visible')
+
+        if (event.key === 'Escape') {
+          submenu.setAttribute('style', 'visibility: hidden')
+        }
+
+        if (event.key === SUPPORTED_KEYS.ARROW_RIGHT) {
+          return firstLink.focus()
+        }
+      }
+
+      // left should go back!
 
       switch (event.key) {
         case SUPPORTED_KEYS.HOME:
@@ -443,6 +472,41 @@ function SubListItem({
   )
 }
 
+const subsubnav = new Navigate('vertical', true)
+const useKeyboardSubSubNavigation = createKeyboardNavHook(subsubnav)
+
+function SubSubListItem({
+  label,
+  children,
+  href = '#',
+  submenu,
+}: ListItemOptions) {
+  function handleKeyDown(event: any) {
+    subsubnav.update(event, label)
+  }
+
+  function handleBlur() {
+    subsubnav.updateBlur(label)
+  }
+
+  const refs = useKeyboardSubSubNavigation(label)
+
+  return (
+    <li className="Nav-item" role="none">
+      <a
+        href={href}
+        role="menu-item"
+        ref={refs}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+      >
+        {children}
+      </a>
+      {submenu}
+    </li>
+  )
+}
+
 export default function App() {
   return (
     <div id="App" className="App">
@@ -497,7 +561,19 @@ export default function App() {
               <ul className="Submenu">
                 <SubListItem label="sub1">first</SubListItem>
                 <SubListItem label="sub2">second</SubListItem>
-                <SubListItem label="sub3">third</SubListItem>
+                <SubListItem
+                  label="sub3"
+                  submenu={
+                    <ul className="Submenu">
+                      <SubSubListItem label="joe">Joe</SubSubListItem>
+                      <SubSubListItem label="matt">Matt</SubSubListItem>
+                      <SubSubListItem label="scott">Scott</SubSubListItem>
+                      <SubSubListItem label="josh">Josh</SubSubListItem>
+                    </ul>
+                  }
+                >
+                  Third
+                </SubListItem>
               </ul>
             }
           >
