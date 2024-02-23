@@ -34,8 +34,8 @@ function Panel({
     setIsOpen((isOpen) => !isOpen)
   }
 
-  function onKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
-    accordion.update(event, label)
+  function onKeyDown(event) {
+    accordion.update<React.KeyboardEvent>(event, label)
   }
 
   React.useEffect(() => {
@@ -99,8 +99,8 @@ function Tab({
     setActiveTabs(label)
   }
 
-  function handleKeyDown(event: React.KeyboardEvent) {
-    tabs.update(event, label)
+  function handleKeyDown(event) {
+    tabs.update<React.KeyboardEvent>(event, label)
   }
 
   const refs = useKeyboardNav(label)
@@ -188,10 +188,6 @@ function Tabs({
   )
 }
 
-/*
- *
-
-
 // if there is a listitem we're in a submenu, we'll need a ref
 // up and down open close submenu
 // left and right in submenu navigates between other dropdowns or to the next top level item
@@ -221,7 +217,6 @@ for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
   const letter = String.fromCharCode(i)
   LETTERS[letter.toUpperCase()] = letter.toLowerCase()
 }
-
 
 class Navigate {
   readonly orientation?: 'vertical' | 'horizontal'
@@ -254,7 +249,7 @@ class Navigate {
     delete this.observers[label]
   }
 
-  update(event: KeyboardEvent, current: string): void {
+  update<KeyEvent = KeyboardEvent>(event: KeyEvent, current: string): void {
     const labelList = Object.keys(this.observers)
     const currentNumber = labelList.findIndex((item) => item === current)
     const firstItem = 0
@@ -426,8 +421,8 @@ interface ListItemOptions {
 }
 
 function ListItem({ label, children, href = '#', submenu }: ListItemOptions) {
-  function handleKeyDown(event: any) {
-    navigation.update(event, label)
+  function handleKeyDown(event) {
+    navigation.update<React.KeyboardEvent>(event, label)
   }
 
   const refs = useKeyboardNavigation(label)
@@ -451,8 +446,8 @@ function SubListItem({
   href = '#',
   submenu,
 }: ListItemOptions) {
-  function handleKeyDown(event: any) {
-    subnav.update(event, label)
+  function handleKeyDown(event) {
+    subnav.update<React.KeyboardEvent>(event, label)
   }
 
   function handleBlur() {
@@ -486,8 +481,8 @@ function SubSubListItem({
   href = '#',
   submenu,
 }: ListItemOptions) {
-  function handleKeyDown(event: any) {
-    subsubnav.update(event, label)
+  function handleKeyDown(event) {
+    subsubnav.update<React.KeyboardEvent>(event, label)
   }
 
   function handleBlur() {
@@ -511,10 +506,6 @@ function SubSubListItem({
     </li>
   )
 }
-
-
- *
- * */
 
 export default function App() {
   return (
@@ -561,7 +552,7 @@ export default function App() {
         <li>Enter / Space</li>
       </ol>
       <hr />
-      {/*       <h2>Keyboard Nav</h2>
+      <h2>Keyboard Nav</h2>
       <nav className="Nav">
         <ul className="Navlist">
           <ListItem
@@ -593,7 +584,6 @@ export default function App() {
           <ListItem label="nav4">Matt</ListItem>
         </ul>
       </nav>
-*/}
     </div>
   )
 }

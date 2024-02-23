@@ -22,7 +22,9 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+
+    "noImplicitAny": false
   },
 
   "exclude": ["node_modules", "__tests__/", "dist/"],

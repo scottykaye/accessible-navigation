@@ -35,7 +35,7 @@ export class KeyboardNav {
     delete this.observers[label]
   }
 
-  update(event: KeyboardEvent, current: string): void {
+  update<KeyEvent = KeyboardEvent>(event: KeyEvent, current: string): void {
     const labelList = Object.keys(this.observers)
     const currentNumber = labelList.findIndex((item) => item === current)
     const firstItem = 0
@@ -79,9 +79,11 @@ export class KeyboardNav {
 }
 
 const mergeRefs = (...refs: Array<React.MutableRefObject<HTMLElement>>) => {
-  return (node: HTMLElement) => {
-    for (const ref of refs) {
-      ref.current = node
+  return (node: HTMLElement | null) => {
+    if (node) {
+      for (const ref of refs) {
+        ref.current = node
+      }
     }
   }
 }
@@ -92,7 +94,7 @@ export function createKeyboardNavHook(instance: KeyboardNav) {
     parentRef?: React.MutableRefObject<HTMLElement>,
   ) {
     const refs = useCallback(
-      (node: HTMLElement) => {
+      (node: HTMLElement | null) => {
         if (parentRef) {
           mergeRefs(parentRef)(node)
         }

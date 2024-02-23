@@ -6,6 +6,7 @@
 .DS_Store
 .turbo
 dist/
+.next/
 
 # User-specific files
 *.rsuser

@@ -6,6 +6,6 @@ export declare class KeyboardNav {
     view(): void;
     subscribe(label: string, element: HTMLElement): void;
     unsubscribe(label: string): void;
-    update(event: KeyboardEvent, current: string): void;
+    update<KeyEvent = KeyboardEvent>(event: KeyEvent, current: string): void;
 }
-export declare function createKeyboardNavHook(instance: KeyboardNav): (label: string, parentRef?: React.MutableRefObject<HTMLElement>) => (node: HTMLElement) => void;
+export declare function createKeyboardNavHook(instance: KeyboardNav): (label: string, parentRef?: React.MutableRefObject<HTMLElement>) => (node: HTMLElement | null) => void;
