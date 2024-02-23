@@ -1,19 +1,21 @@
 {
-  "name": "keyboard-navigation",
+  "name": "accessible-navigation",
   "module": "index.ts",
   "type": "module",
   "version": "0.0.0",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "author": "https://github.com/scottykaye",
   "license": "MIT",
   "scripts": {
-    "type-check": "tsc",
-    "build": "bun build ./index.ts --outdir ./dist --external react"
+    "type-check": "tsc --noEmit",
+    "build": "bun build ./index.ts --outdir ./dist --external react && tsc --emitDeclarationOnly",
+    "prepub": "bun run build",
+    "pub": "npm publish"
   },
   "devDependencies": {
     "@types/react": "^18.2.48",

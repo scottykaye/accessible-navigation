@@ -5,6 +5,7 @@
 
 .DS_Store
 .turbo
+dist/
 
 # User-specific files
 *.rsuser

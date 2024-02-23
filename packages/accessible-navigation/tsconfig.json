@@ -12,10 +12,8 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    // "noEmit": true,
 
     "declaration": true,
-    "emitDeclarationOnly": true,
     "outDir": "./dist",
     "esModuleInterop": true,
 
