@@ -41,8 +41,8 @@ keyboard events.
 
 ```jsx
 import { createKeyboardNav, KeyboardNav } from 'aria-keyboard-a11y'
-const tabs = KeyboardNav('horizontal')
-const useKeyboardNav = createKeyboardNav(tabs)
+const tabs = new KeyboardNav('horizontal')
+const useKeyboardNav = createKeyboardNavHook(tabs)
 
 function Tab({ label, title, setActiveTabs, isSelected = false, index = 0 }) {
   function handleKeyDown(event) {
