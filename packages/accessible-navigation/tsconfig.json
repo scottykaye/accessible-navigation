@@ -12,13 +12,21 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true,
+
+    "declaration": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
 
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["bun-types", "./index.d.ts"]
-  }
+    "types": ["bun-types"],
+
+    "noImplicitAny": false
+  },
+
+  "exclude": ["node_modules", "__tests__/", "dist/"],
+  "include": ["**/*.ts", "**/*.tsx"]
 }
