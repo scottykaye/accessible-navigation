@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #0a0a0a;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,56 +13,314 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+#root {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-button {
+/* App Layout */
+.App {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.app-header {
+  text-align: center;
+  padding: 2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.tagline {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 2rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.app-footer a {
+  color: #646cff;
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Demo Sections */
+.demo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.demo-header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.demo-description {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.demo-content {
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  overflow: hidden;
 }
 
+/* Keyboard Hints */
+.keyboard-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.keyboard-hint-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  min-width: 1.5rem;
+}
+
+/* Accordion */
+.accordion {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.accordion-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-header {
+  margin: 0;
+}
+
+.accordion-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.accordion-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.accordion-button:focus {
+  outline: none;
+  background: rgba(100, 108, 255, 0.15);
+}
+
+.accordion-button:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+.accordion-button.isSelected {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.accordion-icon {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.accordion-panel {
+  padding: 0 1.25rem 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+/* Tabs */
+.tabs {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tablist {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab {
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab:focus {
+  outline: none;
+  background: rgba(100, 108, 255, 0.15);
+}
+
+.tab:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+.tab.isSelected {
+  color: #fff;
+  border-bottom-color: #646cff;
+}
+
+.tab-content {
+  padding: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+/* Light mode */
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #1a1a1a;
     background-color: #ffffff;
   }
-  a:hover {
-    color: #747bff;
+
+  .app-header {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
   }
-  button {
-    background-color: #f9f9f9;
+
+  .tagline,
+  .demo-description {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .app-footer {
+    border-top-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .demo-content {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .keyboard-hint-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  kbd {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  .accordion {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .accordion-item {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .accordion-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .accordion-button:focus {
+    background: rgba(100, 108, 255, 0.1);
+  }
+
+  .accordion-button.isSelected {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .accordion-icon {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .accordion-panel {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .tabs {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .tablist {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .tab {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .tab:hover {
+    color: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .tab:focus {
+    background: rgba(100, 108, 255, 0.1);
+  }
+
+  .tab.isSelected {
+    color: #1a1a1a;
+  }
+
+  .tab-content {
+    color: rgba(0, 0, 0, 0.7);
   }
 }
